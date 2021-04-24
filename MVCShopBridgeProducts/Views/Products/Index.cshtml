@@ -1,57 +1,91 @@
-﻿@model IEnumerable<MVCShopBridgeProducts.Models.mvcProductsModel>
+﻿@model IPagedList<MVCShopBridgeProducts.Models.mvcProductsModel>
+
+@using PagedList.Mvc;
+@using PagedList;
 
 @{
+
     ViewBag.Title = "Index";
 }
 
-<h2>Index</h2>
+
+<h2>Products</h2>
 
 <p>
-    @Html.ActionLink("Create New", "Create")
+    <a href="@Url.Action("AddorEdit","Products")" class="btn btn-default"><i class="fa fa-plus"></i> Create new Product</a>
 </p>
-<table class="table">
-    <tr>
-        <th>
-            @Html.DisplayNameFor(model => model.ProductId)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.Name)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.Description)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.Price)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.Quantity)
-        </th>
-        <th></th>
-    </tr>
 
-@foreach (var item in Model) {
-    <tr>
-        <td>
-            @Html.DisplayFor(modelItem => item.ProductId)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.Name)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.Description)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.Price)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.Quantity)
-        </td>
-        <td>
-            @Html.ActionLink("Edit", "Edit", new { /* id=item.PrimaryKey */ }) |
-            @Html.ActionLink("Details", "Details", new { /* id=item.PrimaryKey */ }) |
-            @Html.ActionLink("Delete", "Delete", new { /* id=item.PrimaryKey */ })
-        </td>
-    </tr>
-}
+<div class="form-body" >
+    @using (Html.BeginForm("Index", "Products", FormMethod.Get))
+    {
+        <div class="form-group">
+            <input type="text" name="search" placeholder="Enter Product name"/>
+            <br />
+            <input type="submit" name="submit" value="Search" class="btn button" />
+        </div>
+    }
+</div>
+    <table class="table table-striped">
+        <thead class="table-heading">
+            <tr>
 
-</table>
+                <th>
+                    @Html.DisplayNameFor(model => model.First().Name)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.First().Description)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.First().Price)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.First().Quantity)
+                </th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+
+        @foreach (var item in Model)
+        {
+            <tr>
+
+                <td>
+                    @Html.DisplayFor(modelItem => item.Name)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Description)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Price)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Quantity)
+                </td>
+                <td>
+                    <a href="@Url.Action("AddorEdit","Products",new { id = item.ProductId })" class="btn btn-default"><i class="fa fa-pencil"></i> Edit</a>
+
+                    <a onclick="Delete(@item.ProductId)" class="btn btn-default"><i class="fa fa-trash"></i> Delete</a>
+                </td>
+            </tr>
+        }
+
+    </table>
+
+    @Html.PagedListPager(Model, i => Url.Action("Index", "Products", new { i, search = Request.QueryString["search"] }))
+
+    @section scripts
+{
+        <script>
+    $(function () {
+        var successMessage = '@TempData["SuccessMessage"]';
+        if (successMessage != '')
+            alertify.success(successMessage);
+
+    });
+    function Delete(id) {
+        alertify.confirm('ShopBridge Products', 'Are you sure to delete this record?', function () {
+            window.location.href = '@Url.Action("Delete","Products")/'+id;
+        }, null);
+    }
+        </script>
+    }
